@@ -841,11 +841,11 @@ show_information(){
 	if [ "${caddy_port}" -eq "443" ];then
 	echo -e "${Green} Website 伪装站点：${Font} https://${domain}"
 	echo -e "${Green} 客户端配置文件下载地址（URL）：${Font} https://${domain}/${web_download_path}/config.json ${Green} ${Font}"
-	echo -e "${Green} Windows 客户端（已打包 config 即下即用） ：${Font} https://${domain}/${web_download_path}/V2rayPro.zip ${Green} ${Font}"
+	echo -e "${Green} Windows 客户端（已打包 config 即下即用） ：${Font} https://${domain}/${web_download_path}/v2rayN-win.zip ${Green} ${Font}"
 	else
 	echo -e "${Green} Website 伪装站点：${Font} https://${domain}:${caddy_port}"
 	echo -e "${Green} 客户端配置文件下载地址（URL）：${Font} https://${domain}:${caddy_port}/${web_download_path}/config.json ${Green} ${Font}"
-	echo -e "${Green} Windows 客户端（已打包 config 即下即用） ：${Font} https://${domain}:${caddy_port}/${web_download_path}/V2rayPro.zip ${Green} ${Font}"
+	echo -e "${Green} Windows 客户端（已打包 config 即下即用） ：${Font} https://${domain}:${caddy_port}/${web_download_path}/v2rayN-win.zip ${Green} ${Font}"
 	fi
 	echo -e "----------------------------------------------------------"
 }
@@ -900,7 +900,7 @@ else
 	judge "重启V2ray进程载入新的配置文件"
 	echo -e "${OK} ${GreenBG} 新的 用户id（UUID）: ${UUID} ${Font}"
 	echo -e "${OK} ${GreenBG} 新的 客户端配置文件下载地址（URL）：https://你的域名:端口/${web_download_path}/config.json ${Font}"
-	echo -e "${OK} ${GreenBG} 新的 Windows 客户端（已打包 config 即下即用）：https://你的域名:端口/${web_download_path}/V2rayPro.zip ${Font}"
+	echo -e "${OK} ${GreenBG} 新的 Windows 客户端（已打包 config 即下即用）：https://你的域名:端口/${web_download_path}/v2rayN-win.zip ${Font}"
 fi
 }
 
@@ -939,25 +939,26 @@ fi
 
 #生成Windows客户端
 win64_v2ray(){
-	TAG_URL="https://api.github.com/repos/v2ray/v2ray-core/releases/latest"
-	LATEST_VER=`curl -s ${TAG_URL} --connect-timeout 10| grep 'tag_name' | cut -d\" -f4`
+	V2RAYN_URL="https://github.com/2dust/v2rayN/releases"
+	LATEST_VER=${curl -s ${V2RAYN_URL} --connect-timeout 10 | grep  --color 'releases/tag' | awk -F'<|>' '{print $3}'}
+#	TAG_URL="https://api.github.com/repos/v2ray/v2ray-core/releases/latest"
+#	LATEST_VER=`curl -s ${TAG_URL} --connect-timeout 10| grep 'tag_name' | cut -d\" -f4`
 
   rm -rf ${v2ray_win_client_dir}
 	mkdir -p ${v2ray_win_client_dir}
 	cd ${v2ray_win_client_dir}
 
-	wget https://github.com/dylanbai8/V2Ray_h2-tls_Website_onekey/raw/master/V2rayPro.zip
-	wget https://github.com/v2ray/v2ray-core/releases/download/${LATEST_VER}/v2ray-windows-64.zip
+	wget https://github.com/2dust/v2rayN/releases/download/${LATEST_VER}/v2rayN-Core.zip
+	wget https://github.com/2dust/v2rayN/releases/download/${LATEST_VER}/v2rayN.zip
+
+#	wget https://github.com/dylanbai8/V2Ray_h2-tls_Website_onekey/raw/master/V2rayPro.zip
+#	wget https://github.com/v2ray/v2ray-core/releases/download/${LATEST_VER}/v2ray-windows-64.zip
 	echo -e "${OK} ${GreenBG} 正在生成Windows客户端 v2ray-core 最新版本 ${LATEST_VER} ${Font}"
-	unzip V2rayPro.zip
-	unzip v2ray-windows-64.zip
-	rm -rf V2rayPro.zip v2ray-windows-64.zip
-	mv ./V2rayPro/v2ray/wv2ray-service.exe ./v2ray-${LATEST_VER}-windows-64
-	rm -rf ./V2rayPro/v2ray
-	mv ./v2ray-${LATEST_VER}-windows-64 ./V2rayPro/v2ray
-	cp -rp ${v2ray_conf_client} ./V2rayPro/v2ray/config.json
-	zip -q -r ${website_dir}/${web_download_path}/V2rayPro.zip ./V2rayPro
-	rm -rf ./V2rayPro
+	unzip v2rayN-Core.zip
+	rm -rf v2rayN-Core.zip
+	cp -rp ${v2ray_conf_client} ./v2rayN-Core/config.json
+	zip -q -r ${website_dir}/${web_download_path}/v2rayN-win.zip ./v2rayN-Core
+	rm -rf ./v2rayN-Core
 }
 
 #Bash执行选项
