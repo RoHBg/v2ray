@@ -275,7 +275,7 @@ v2ray_install(){
 	fi
 
 	mkdir -p ${v2ray_script_dir} && cd ${v2ray_script_dir}
-	wget -O go.sh https://raw.githubusercontent.com/RoHBg/v2ray/master/install_v2ray.sh
+	wget -O go.sh https://raw.githubusercontent.com/RoHBg/v2ray/master/script/install_v2ray.sh
 #	wget -N --no-check-certificate https://install.direct/go.sh
 	
 	if [[ -f go.sh ]];then
@@ -306,7 +306,7 @@ modify_crontab(){
 
 #安装caddy主程序
 caddy_install(){
-	curl https://raw.githubusercontent.com/RoHBg/v2ray/master/install_caddy.sh | bash -s personal
+	curl https://raw.githubusercontent.com/RoHBg/v2ray/master/script/install_caddy.sh | bash -s personal
 #	curl https://getcaddy.com | bash -s personal
 
 	chown root:root ${caddy_bin_file}
