@@ -1,9 +1,10 @@
 #!/bin/bash
 
 #====================================================
-#	System Request:Debian 7+/Ubuntu 15+/Centos 6+
-#	Dscription: V2RAY 基于 CADDY 的 VMESS+H2|WS+TLS+Website(Use Host)+BBR
-#	Official document: www.v2ray.com
+# System Request:Debian 7+/Ubuntu 15+/Centos 6+
+# Dscription: V2RAY 基于 CADDY 的 VMESS+H2|WS+TLS+Website(Use Host)+BBR
+# Official document: www.v2ray.com
+# Download this script from: https://raw.githubusercontent.com/RoHBg/v2ray/master/script/v2ray_caddy_h2.sh
 #====================================================
 
 #定义文字颜色
@@ -870,7 +871,7 @@ main(){
 	caddy_conf_create
 #	v2ray_client_config_create
 	enable_bbr
-#	win64_v2ray
+	win64_v2ray
 	check_ssl
 	show_information
 	start_process_systemd
@@ -940,22 +941,22 @@ fi
 #生成Windows客户端
 win64_v2ray(){
 	V2RAYN_URL="https://github.com/2dust/v2rayN/releases"
-	LATEST_VER=${curl -s ${V2RAYN_URL} --connect-timeout 10 | grep  --color 'releases/tag' | awk -F'<|>' '{print $3}'}
+	LATEST_VER=$(curl -s ${V2RAYN_URL} --connect-timeout 10 | grep  --color 'releases/tag' | awk -F'<|>' '{print $3}')
 #	TAG_URL="https://api.github.com/repos/v2ray/v2ray-core/releases/latest"
 #	LATEST_VER=`curl -s ${TAG_URL} --connect-timeout 10| grep 'tag_name' | cut -d\" -f4`
 
   rm -rf ${v2ray_win_client_dir}
 	mkdir -p ${v2ray_win_client_dir}
-	cd ${v2ray_win_client_dir}
 
 	wget https://github.com/2dust/v2rayN/releases/download/${LATEST_VER}/v2rayN-Core.zip
-	wget https://github.com/2dust/v2rayN/releases/download/${LATEST_VER}/v2rayN.zip
+#	wget https://github.com/2dust/v2rayN/releases/download/${LATEST_VER}/v2rayN.zip
 
-#	wget https://github.com/dylanbai8/V2Ray_h2-tls_Website_onekey/raw/master/V2rayPro.zip
 #	wget https://github.com/v2ray/v2ray-core/releases/download/${LATEST_VER}/v2ray-windows-64.zip
 	echo -e "${OK} ${GreenBG} 正在生成Windows客户端 v2ray-core 最新版本 ${LATEST_VER} ${Font}"
+
+	cd ${v2ray_win_client_dir}
 	unzip v2rayN-Core.zip
-	rm -rf v2rayN-Core.zip
+	rm -f v2rayN-Core.zip
 	cp -rp ${v2ray_conf_client} ./v2rayN-Core/config.json
 	zip -q -r ${website_dir}/${web_download_path}/v2rayN-win.zip ./v2rayN-Core
 	rm -rf ./v2rayN-Core
