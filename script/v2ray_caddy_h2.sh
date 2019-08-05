@@ -869,11 +869,11 @@ main(){
 #	web_install
 	v2ray_conf_create
 	caddy_conf_create
-#	v2ray_client_config_create
+	v2ray_client_config_create
 	enable_bbr
 	win64_v2ray
 	check_ssl
-	show_information
+	show_information > /root/info
 	start_process_systemd
 }
 
