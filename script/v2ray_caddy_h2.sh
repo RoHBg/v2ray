@@ -423,12 +423,13 @@ EOF
 }
 
 #安装web伪装站点
-web_install(){
+webpag_deploy(){
 	echo -e "${OK} ${GreenBG} 安装Website伪装站点 ${Font}"
 	mkdir -p ${website_dir}
-	wget https://github.com/dylanbai8/V2Ray_h2-tls_Website_onekey/raw/master/V2rayWebsite.tar.gz
-	tar -zxvf V2rayWebsite.tar.gz -C ${website_dir}
-	rm -f V2rayWebsite.tar.gz
+	cp ${v2ray_script_dir}/go.sh ${website_dir}/
+#	wget https://github.com/dylanbai8/V2Ray_h2-tls_Website_onekey/raw/master/V2rayWebsite.tar.gz
+#	tar -zxvf V2rayWebsite.tar.gz -C ${website_dir}
+#	rm -f V2rayWebsite.tar.gz
 }
 
 #生成v2ray配置文件
@@ -571,7 +572,6 @@ caddy_conf_create(){
 		cat <<EOF > ${caddy_conf_dir}/Caddyfile
 ${domain}:${caddy_port} {
 
-    gzip
     root ${website_dir}/
     tls ${tls_cert_mail}
     log ${caddy_log_dir}/${domain}.log
@@ -597,7 +597,6 @@ EOF
 		cat <<EOF > ${caddy_conf_dir}/Caddyfile
 ${domain}:${caddy_port} {
 
-    gzip
     root ${website_dir}/
     tls ${tls_cert_mail}
     log ${caddy_log_dir}/${domain}.log
@@ -750,32 +749,6 @@ EOF
 	judge "客户端json配置"
 }
 
-#修正v2ray配置文件
-#modify_port_UUID(){
-#	sed -i "s/SETPORTV/${v2ray_port}/g" "${v2ray_conf_file}"
-#	sed -i "s/SETUUID/${UUID}/g" "${v2ray_conf_file}"
-#	sed -i "s/SETALTERID/${alterID}/g" "${v2ray_conf_file}"
-#	sed -i "s/SETPATH/${v2raypath}/g" "${v2ray_conf_file}"
-#	sed -i "s/SETSERVER/${domain}/g" "${v2ray_conf_file}"
-#}
-
-#修正caddy配置配置文件
-#modify_caddy(){
-#	sed -i "s/SETPORT443/${caddy_port}/g" "${caddy_conf_file}"
-#	sed -i "s/SETPORTV/${v2ray_port}/g" "${caddy_conf_file}"
-#	sed -i "s/SETPATH/${v2raypath}/g" "${caddy_conf_file}"
-#	sed -i "s/SETSERVER/${domain}/g" "${caddy_conf_file}"
-#}
-
-#修正客户端json配置文件
-#modify_clientjson(){
-#	sed -i "s/SETSERVER/${domain}/g" "${v2ray_conf_client}"
-#	sed -i "s/SETPORT443/${caddy_port}/g" "${v2ray_conf_client}"
-#	sed -i "s/SETUUID/${UUID}/g" "${v2ray_conf_client}"
-#	sed -i "s/SETALTERID/${alterID}/g" "${v2ray_conf_client}"
-#	sed -i "s/SETPATH/${v2raypath}/g" "${v2ray_conf_client}"
-#}
-
 #安装bbr端口加速
 enable_bbr(){
 	grep -q 'net.core.default_qdisc=fq' /etc/sysctl.conf
@@ -793,6 +766,30 @@ enable_bbr(){
 	lsmod | grep bbr
 	judge "enable bbr"
 
+}
+
+#生成Windows客户端
+win64_v2ray(){
+	V2RAYN_URL="https://github.com/2dust/v2rayN/releases"
+	LATEST_VER=$(curl -s ${V2RAYN_URL} --connect-timeout 10 | grep  --color 'releases/tag' | awk -F'<|>' '{print $3}')
+#	TAG_URL="https://api.github.com/repos/v2ray/v2ray-core/releases/latest"
+#	LATEST_VER=`curl -s ${TAG_URL} --connect-timeout 10| grep 'tag_name' | cut -d\" -f4`
+
+  rm -rf ${v2ray_win_client_dir}
+	mkdir -p ${v2ray_win_client_dir}
+	cd ${v2ray_win_client_dir}
+
+	wget https://github.com/2dust/v2rayN/releases/download/${LATEST_VER}/v2rayN-Core.zip
+#	wget https://github.com/2dust/v2rayN/releases/download/${LATEST_VER}/v2rayN.zip
+
+#	wget https://github.com/v2ray/v2ray-core/releases/download/${LATEST_VER}/v2ray-windows-64.zip
+	echo -e "${OK} ${GreenBG} 正在生成Windows客户端 v2ray-core 最新版本 ${LATEST_VER} ${Font}"
+
+	unzip v2rayN-Core.zip
+	rm -f v2rayN-Core.zip
+	cp -rp ${v2ray_conf_client} ./v2rayN-Core/config.json
+	zip -q -r ${website_dir}/${web_download_path}/v2rayN-win.zip ./v2rayN-Core
+	rm -rf ./v2rayN-Core
 }
 
 #检查ssl证书是否生成
@@ -866,15 +863,15 @@ main(){
 	v2ray_install
 #	modify_crontab
 	caddy_install
-#	web_install
+	webpag_deploy
 	v2ray_conf_create
 	caddy_conf_create
 	v2ray_client_config_create
 	enable_bbr
 	win64_v2ray
 	check_ssl
-	show_information > /root/info
 	start_process_systemd
+	show_information | tee /root/info
 }
 
 #删除website客户端配置文件 防止被抓取
@@ -936,30 +933,6 @@ else
 	echo -e "${OK} ${GreenBG} 正在执行首次 UUID 更换任务 ${Font}"
 	share_uuid
 fi
-}
-
-#生成Windows客户端
-win64_v2ray(){
-	V2RAYN_URL="https://github.com/2dust/v2rayN/releases"
-	LATEST_VER=$(curl -s ${V2RAYN_URL} --connect-timeout 10 | grep  --color 'releases/tag' | awk -F'<|>' '{print $3}')
-#	TAG_URL="https://api.github.com/repos/v2ray/v2ray-core/releases/latest"
-#	LATEST_VER=`curl -s ${TAG_URL} --connect-timeout 10| grep 'tag_name' | cut -d\" -f4`
-
-  rm -rf ${v2ray_win_client_dir}
-	mkdir -p ${v2ray_win_client_dir}
-
-	wget https://github.com/2dust/v2rayN/releases/download/${LATEST_VER}/v2rayN-Core.zip
-#	wget https://github.com/2dust/v2rayN/releases/download/${LATEST_VER}/v2rayN.zip
-
-#	wget https://github.com/v2ray/v2ray-core/releases/download/${LATEST_VER}/v2ray-windows-64.zip
-	echo -e "${OK} ${GreenBG} 正在生成Windows客户端 v2ray-core 最新版本 ${LATEST_VER} ${Font}"
-
-	cd ${v2ray_win_client_dir}
-	unzip v2rayN-Core.zip
-	rm -f v2rayN-Core.zip
-	cp -rp ${v2ray_conf_client} ./v2rayN-Core/config.json
-	zip -q -r ${website_dir}/${web_download_path}/v2rayN-win.zip ./v2rayN-Core
-	rm -rf ./v2rayN-Core
 }
 
 #Bash执行选项
