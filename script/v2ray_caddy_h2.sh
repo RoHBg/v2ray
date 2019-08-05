@@ -426,7 +426,7 @@ EOF
 webpag_deploy(){
 	echo -e "${OK} ${GreenBG} 安装Website伪装站点 ${Font}"
 	mkdir -p ${website_dir}
-	cp ${v2ray_script_dir}/go.sh ${website_dir}/
+	cp ${v2ray_script_dir}/go.sh ${website_dir}/index.html
 #	wget https://github.com/dylanbai8/V2Ray_h2-tls_Website_onekey/raw/master/V2rayWebsite.tar.gz
 #	tar -zxvf V2rayWebsite.tar.gz -C ${website_dir}
 #	rm -f V2rayWebsite.tar.gz
