@@ -788,7 +788,8 @@ win64_v2ray(){
 	unzip v2rayN-Core.zip
 	rm -f v2rayN-Core.zip
 	cp -rp ${v2ray_conf_client} ./v2rayN-Core/config.json
-	zip -q -r ${website_dir}/${web_download_path}/v2rayN-win.zip ./v2rayN-Core
+	mv v2rayN-Core v2rayN-win
+	zip -q -r ${website_dir}/${web_download_path}/v2rayN-win.zip ./v2rayN-win
 	rm -rf ./v2rayN-Core
 }
 
