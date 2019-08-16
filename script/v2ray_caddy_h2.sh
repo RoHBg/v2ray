@@ -423,7 +423,7 @@ EOF
 }
 
 #安装web伪装站点
-webpag_deploy(){
+webpage_deploy(){
 	echo -e "${OK} ${GreenBG} 安装Website伪装站点 ${Font}"
 	mkdir -p ${website_dir}
 	cp ${v2ray_script_dir}/go.sh ${website_dir}/index.html
@@ -864,7 +864,7 @@ main(){
 	v2ray_install
 #	modify_crontab
 	caddy_install
-	webpag_deploy
+	webpage_deploy
 	v2ray_conf_create
 	caddy_conf_create
 	v2ray_client_config_create
