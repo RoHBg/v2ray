@@ -33,6 +33,9 @@ caddy_bin_file="/usr/local/bin/caddy"
 www_dir="/var/www"
 tls_cert_mail="pisces562@gmail.com"
 
+# define command alias
+wget="wget --tries=3 "
+
 source /etc/os-release
 
 # show up level function name
@@ -276,8 +279,8 @@ v2ray_install(){
 	fi
 
 	mkdir -p ${v2ray_script_dir} && cd ${v2ray_script_dir}
-	wget -O go.sh https://raw.githubusercontent.com/RoHBg/v2ray/master/script/install_v2ray.sh
-#	wget -N --no-check-certificate https://install.direct/go.sh
+	${wget} -O go.sh https://raw.githubusercontent.com/RoHBg/v2ray/master/script/install_v2ray.sh
+#	${wget} -N --no-check-certificate https://install.direct/go.sh
 	
 	if [[ -f go.sh ]];then
 		bash go.sh --force
@@ -342,7 +345,7 @@ caddy_install(){
 	chmod -R 555 ${www_dir}/${domain}
 
 	# Install the systemd service unit configuration file, reload the systemd daemon, and start caddy:
-#	wget https://raw.githubusercontent.com/caddyserver/caddy/master/dist/init/linux-systemd/caddy.service
+#	${wget} https://raw.githubusercontent.com/caddyserver/caddy/master/dist/init/linux-systemd/caddy.service
 #	cp caddy.service /etc/systemd/system/
 #	rm -f caddy.service
 
@@ -427,7 +430,7 @@ webpage_deploy(){
 	echo -e "${OK} ${GreenBG} 安装Website伪装站点 ${Font}"
 	mkdir -p ${website_dir}
 	cp ${v2ray_script_dir}/go.sh ${website_dir}/index.html
-#	wget https://github.com/dylanbai8/V2Ray_h2-tls_Website_onekey/raw/master/V2rayWebsite.tar.gz
+#	${wget} https://github.com/dylanbai8/V2Ray_h2-tls_Website_onekey/raw/master/V2rayWebsite.tar.gz
 #	tar -zxvf V2rayWebsite.tar.gz -C ${website_dir}
 #	rm -f V2rayWebsite.tar.gz
 }
@@ -771,18 +774,19 @@ enable_bbr(){
 #生成Windows客户端
 win64_v2ray(){
 	V2RAYN_URL="https://github.com/2dust/v2rayN/releases"
-	LATEST_VER=$(curl -s ${V2RAYN_URL} --connect-timeout 10 | grep  --color 'releases/tag' | awk -F'<|>' '{print $3}')
+	LATEST_VER=$(curl -s ${V2RAYN_URL} --connect-timeout 10 | grep  --color 'releases/tag' | head -1 | awk -F'<|>' '{print $3}')
+	echo " -- the latest v2rayN-Core version is ${LATEST_VER}"
 #	TAG_URL="https://api.github.com/repos/v2ray/v2ray-core/releases/latest"
 #	LATEST_VER=`curl -s ${TAG_URL} --connect-timeout 10| grep 'tag_name' | cut -d\" -f4`
 
-  rm -rf ${v2ray_win_client_dir}
+  	rm -rf ${v2ray_win_client_dir}
 	mkdir -p ${v2ray_win_client_dir}
 	cd ${v2ray_win_client_dir}
 
-	wget https://github.com/2dust/v2rayN/releases/download/${LATEST_VER}/v2rayN-Core.zip
-#	wget https://github.com/2dust/v2rayN/releases/download/${LATEST_VER}/v2rayN.zip
+	${wget} https://github.com/2dust/v2rayN/releases/download/${LATEST_VER}/v2rayN-Core.zip
+#	${wget} https://github.com/2dust/v2rayN/releases/download/${LATEST_VER}/v2rayN.zip
 
-#	wget https://github.com/v2ray/v2ray-core/releases/download/${LATEST_VER}/v2ray-windows-64.zip
+#	${wget} https://github.com/v2ray/v2ray-core/releases/download/${LATEST_VER}/v2ray-windows-64.zip
 	echo -e "${OK} ${GreenBG} 正在生成Windows客户端 v2ray-core 最新版本 ${LATEST_VER} ${Font}"
 
 	unzip v2rayN-Core.zip
@@ -796,14 +800,22 @@ win64_v2ray(){
 #检查ssl证书是否生成
 check_ssl(){
 	echo -e "${OK} ${GreenBG} 正在等待域名证书生成 ${Font}"
-	sleep 15
-if [[ -e ${caddy_cert_dir}/acme/acme-v02.api.letsencrypt.org/sites/${domain}/${domain}.key ]]; then
-	echo -e "${OK} ${GreenBG} SSL证书申请 成功 ${Font}"
-else
-	echo -e "${Error} ${RedBG} SSL证书申请 失败 请确认是否超出Let’s Encrypt申请次数或检查服务器网络 ${Font}"
-	echo -e "${Error} ${RedBG} 注意：证书每个IP每3小时10次 7天内每个子域名不超过5次总计不超过20次 ${Font}"
-	exit 1
-fi
+
+	while(:); do
+		if [[ -e ${caddy_cert_dir}/acme/acme-v02.api.letsencrypt.org/sites/${domain}/${domain}.key ]]; then
+			echo -e "${OK} ${GreenBG} SSL证书申请 成功 ${Font}"
+			break
+		fi
+
+		((repeat_check++))
+		sleep 3
+
+		if [[ ${repeat_check} -gt 10 ]]; then
+			echo -e "${Error} ${RedBG} SSL证书申请 失败 请确认是否超出Let’s Encrypt申请次数或检查服务器网络 ${Font}"
+			echo -e "${Error} ${RedBG} 注意：证书每个IP每3小时10次 7天内每个子域名不超过5次总计不超过20次 ${Font}"
+			exit 1
+		fi
+	done
 }
 
 #重启caddy和v2ray程序 加载配置
