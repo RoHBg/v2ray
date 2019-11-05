@@ -75,7 +75,7 @@ is_root(){
 
 #检测系统版本
 check_system(){
-	VERSION=`echo ${VERSION} | awk -F "[()]" '{print $2}'`
+	VERSION=$(echo ${VERSION} | awk -F "[()]" '{print $2}')
 	if [[ "${ID}" == "centos" && ${VERSION_ID} -ge 7 ]];then
 		echo -e "${OK} ${GreenBG} 当前系统为 Centos ${VERSION_ID} ${VERSION} ${Font}"
 		INS="yum"
@@ -255,21 +255,31 @@ port_exist_check(){
 #同步服务器时间
 time_modify(){
 
-	${INS} install ntpdate -y
-	judge "安装 NTPdate 时间同步服务 "
+	if [[ "${ID}" == "centos" && ${VERSION_ID} -ge 8 ]];then
+		pkg_name="chrony"
+		svc_name="chronyd"
+		sync_time_cmd="chronyc -a makestep"
+	else
+		pkg_name="ntpdate"
+		svc_name="ntp"
+		sync_time_cmd="systemctl stop ${svc_name} &>/dev/null; ntpdate time.nist.gov"
+	fi
 
-	systemctl stop ntp &>/dev/null
+	${INS} install ${pkg_name} -y
+	judge "安装 ${pkg_name} 时间同步服务 "
 
 	echo -e "${Info} ${GreenBG} 正在进行时间同步 ${Font}"
-	ntpdate time.nist.gov
+	${sync_time_cmd}
 
 	if [[ $? -eq 0 ]];then 
 		echo -e "${OK} ${GreenBG} 时间同步成功 ${Font}"
-		echo -e "${OK} ${GreenBG} 当前系统时间 `date -R`（时区时间换算后误差应为三分钟以内）${Font}"
+		echo -e "${OK} ${GreenBG} 当前系统时间 $(date -R)（时区时间换算后误差应为三分钟以内）${Font}"
 		sleep 1
 	else
-		echo -e "${Error} ${RedBG} 时间同步失败，请检查ntpdate服务是否正常工作 ${Font}"
-	fi 
+		echo -e "${Error} ${RedBG} 时间同步失败，请检查 ${pkg_name} 服务是否正常工作 ${Font}"
+	fi
+
+	systemctl start ${svc_name} &>/dev/null
 }
 
 #安装v2ray主程序
@@ -881,8 +891,8 @@ main(){
 	caddy_conf_create
 	v2ray_client_config_create
 	enable_bbr
-	win64_v2ray
 	check_ssl
+	win64_v2ray
 	start_process_systemd
 	show_information | tee /root/info
 }
