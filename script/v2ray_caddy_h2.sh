@@ -81,6 +81,7 @@ check_system(){
 		INS="yum"
 		echo -e "${OK} ${GreenBG} SElinux 设置中，请耐心等待，不要进行其他操作${Font}"
 		setsebool -P httpd_can_network_connect 1 >/dev/null 2>&1
+		setenforce Permissive
 		echo -e "${OK} ${GreenBG} SElinux 设置完成 ${Font}"
 	elif [[ "${ID}" == "debian" && ${VERSION_ID} -ge 8 ]];then
 		echo -e "${OK} ${GreenBG} 当前系统为 Debian ${VERSION_ID} ${VERSION} ${Font}"
@@ -332,12 +333,12 @@ caddy_install(){
 	# create account www-data if id doesn't exist
 	id www-data
 	if [[ $? -ne 0 ]]; then
-		groupadd -g 33 www-data
+		groupadd www-data
 		useradd \
 		  -g www-data --no-user-group \
 		  --home-dir ${www_dir} --no-create-home \
 		  --shell /usr/sbin/nologin \
-		  --system --uid 33 www-data
+		  --system www-data
 	fi
 
 	mkdir ${caddy_conf_dir}/
