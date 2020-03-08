@@ -307,8 +307,8 @@ modify_crontab(){
 	echo -e "${OK} ${GreenBG} 配置每天凌晨自动升级V2ray内核任务 ${Font}"
 	sleep 2
 	#crontab -l >> crontab.txt
-	echo "20 12 * * * bash ${v2ray_script_dir}/go.sh | tee -a ${v2ray_script_dir}/update.log" >> crontab.txt
-	echo "30 12 * * * /sbin/reboot" >> crontab.txt
+	echo "00 03 * * * bash ${v2ray_script_dir}/go.sh | tee -a ${v2ray_script_dir}/update.log" >> crontab.txt
+#	echo "30 12 * * * /sbin/reboot" >> crontab.txt
 	crontab crontab.txt
 	sleep 2
 	if [[ "${ID}" == "centos" ]];then
@@ -885,7 +885,7 @@ main(){
 	port_exist_check ${caddy_port}
 	time_modify
 	v2ray_install
-#	modify_crontab
+	modify_crontab
 	caddy_install
 	webpage_deploy
 	v2ray_conf_create
@@ -893,7 +893,7 @@ main(){
 	v2ray_client_config_create
 	enable_bbr
 	check_ssl
-	win64_v2ray
+#	win64_v2ray
 	start_process_systemd
 	show_information | tee /root/info
 }
